@@ -15,6 +15,7 @@ def get_files_info(working_directory, directory=None):
 
         for file in os.listdir(current_directory):
             print(file_format(file))
+        
     
     except Exception as e:
         return f'Error: {e}'

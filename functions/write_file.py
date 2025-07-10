@@ -27,7 +27,7 @@ schema_write_file = types.FunctionDeclaration(
                 type=types.Type.STRING,
                 description="The file path of new file that has been written by the function, relative to the working directory.",
             ),
-            "contents": types.Schema(
+            "content": types.Schema(
                 type=types.Type.STRING,
                 description="The contents of the file that has been written by the function, relative to the working directory."
             )

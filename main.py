@@ -1,10 +1,12 @@
 import os
+from tabnanny import verbose
 from functions.get_file_content import schema_get_file_content
 from functions.get_files_info import schema_get_files_info
 from dotenv import load_dotenv
 from google import genai
-from functions.run_python import schema_run_python_file
+from functions.run_python_file import schema_run_python_file
 from functions.write_file import schema_write_file
+from functions.call_function import call_function
 from google.genai import types
 import sys
 
@@ -25,7 +27,7 @@ def main():
 
     - List files and directories
     - Read file contents
-    - Execute Python files with optional arguments
+    - Run/Execute Python files with optional arguments
     - Write or overwrite files
 
     All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
@@ -52,14 +54,18 @@ def main():
         )
     )
 
-    print(response.text)
-
-    print(f"Calling function: {response.function_calls[0].name}({response.function_calls[0].args})")
-
     if "--verbose" in sys.argv:
-        print(f"User prompt: {prompt}")
-        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+        function_call_result = call_function(response.function_calls[0], verbose=True)
+
+        if function_call_result.parts[0].function_response.response is None:
+            raise Exception("Error: no response from call_function")
+
+        print(f"-> {function_call_result.parts[0].function_response.response}")
+
+    else:
+        function_call_result = call_function(response.function_calls[0])
+        if function_call_result.parts[0].function_response.response is None:
+            raise Exception("Error: no response from call_function")
 
 if __name__ == "__main__":
     main()
