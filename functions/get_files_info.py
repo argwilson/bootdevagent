@@ -2,20 +2,25 @@ import os
 from google.genai import types
 
 def get_files_info(working_directory, directory=None):
+    abs_working_dir = os.path.abspath(working_directory)
+    current_dir = abs_working_dir
+    if directory:
+        current_dir = os.path.abspath(os.path.join(working_directory, directory))
+    if not current_dir.startswith(abs_working_dir):
+        return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
+    if not os.path.isdir(current_dir):
+        return f'Error: "{directory}" is not a directory'
     try:
-        current_directory = os.path.abspath(os.path.join(working_directory, directory))
-        if not current_directory.startswith(os.path.abspath(working_directory)):
-            return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
-        elif not os.path.isdir(current_directory):
-            return f'Error: "{directory}" is not a directory'
-
-        def file_format(file_name):
-            file_path = os.path.join(current_directory, file_name)
-            return f" - {file_name}: file_size={os.path.getsize(file_path)}, is_dir={os.path.isdir(file_path)}"
-
-        for file in os.listdir(current_directory):
-            print(file_format(file))
-        
+        files_info = []
+        for filename in os.listdir(current_dir):
+            filepath = os.path.join(current_dir, filename)
+            file_size = 0
+            is_dir = os.path.isdir(filepath)
+            file_size = os.path.getsize(filepath)
+            files_info.append(
+                f"- {filename}: file_size={file_size} bytes, is_dir={is_dir}"
+            )
+        return "\n".join(files_info)
     
     except Exception as e:
         return f'Error: {e}'
